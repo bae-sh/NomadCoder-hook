@@ -1,24 +1,29 @@
-import { useEffect, useRef } from "react";
-
-const useFadeIn = (duration = 1, delay = 0) => {
-    const element = useRef();
-    useEffect(() => {
-        if (element.current) {
-            const { current } = element;
-            current.style.transition = `opacity ${duration}s ease-in-out ${delay}s`;
-            current.style.opacity = 1;
+const useNotification = () => {
+    if (!("Notification" in window)) {
+        return;
+    }
+    const fireNotif = (title, options) => {
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                    new Notification(title, options);
+                } else {
+                    return;
+                }
+            });
+        } else {
+            new Notification(title, options);
+            console.log(options);
         }
-    }, []);
-    return { ref: element, style: { opacity: 0 } };
+    };
+    return fireNotif;
 };
-function App() {
-    const FadeInH1 = useFadeIn(1, 2);
-    const FadeInP = useFadeIn(5, 10);
 
+function App() {
+    const triggerNotif = useNotification("hi", { body: "bye" });
     return (
         <div>
-            <h1 {...FadeInH1}>Hello</h1>
-            <p {...FadeInP}>lalala</p>
+            <button onClick={triggerNotif}>Hello</button>
         </div>
     );
 }
